@@ -1,0 +1,184 @@
+{% extends "weather/base2.html" %}
+{%  block content %}
+<div class="row">
+
+    <div class="card horizontal z-depth-3">
+    <div class="card-image">
+      <img class="activator" src="http://openweathermap.org/img/w/{{ weather_date.icon }}.png">
+    </div>
+    <div class="card-stacked">
+        <span class="card-title activator grey-text text-darken-4">{{ weather_date.city }}<span class='right'><i class="material-icons right">more_vert</i></span></span>
+        <br>
+        <span class="left grey-text activator">Currently <strong>{{ weather_date.description }}</strong> and tempreature <strong>{{ weather_date.temperture }}°C</strong>.
+                Speed of wind approximetly <strong>{{ weather_date.windspead }}m/s</strong> from <strong>{{ weather_date.direction_symbol }}</strong>. Pressure stable <strong>{{ weather_date.pressure }}hPa</strong> on groun level.
+                 Humidity <strong>{{ weather_date.humidity }}%</strong> with <strong>{{ weather_date.clouds }}%</strong>cloud cover.</span>
+        <br>
+            <span id='forecast' style="size: 90%;"></span>
+    </div>
+    <div class="card-reveal">
+      <span class="card-title grey-text text-darken-4">{{ weather_date.city }}<i class="material-icons right">close</i></span>
+      <p class="left grey-text">Source: openweathermap.org</p>
+            <div id="Clouds" class="col s12 m4 l4"></div>
+            <div id="Wind" class="col s12 m4 l4"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{%  block scripts %}
+Highcharts.chart('forecast', {
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'forecast'
+            },
+            xAxis: [{
+                categories: [{% for day in weather_date.date %} '{{ day }}' {% if not forloop.last%}, {% endif %}{% endfor%}],
+                crosshair: true
+            }],
+    yAxis: [{ // Primary yAxis
+        labels: {
+            format: '{value}°C',
+            style: {
+                color: Highcharts.getOptions().colors[3]
+            }
+        },
+        title: {
+            text: 'Temperature',
+            style: {
+                color: Highcharts.getOptions().colors[3]
+            }
+        }
+    }, { // Secondary yAxis
+        title: {
+            text: 'Rainfall',
+            style: {
+                color: Highcharts.getOptions().colors[0]
+            }
+        },
+        labels: {
+            format: '{value} mm',
+            style: {
+                color: Highcharts.getOptions().colors[0]
+            }
+        },
+        opposite: true
+    }],
+    tooltip: {
+        shared: true
+    },
+    legend: {
+        layout: 'vertical',
+        align: 'right',
+        x: -120,
+        verticalAlign: 'top',
+        y: -10,
+        floating: true,
+        backgroundColor:
+            Highcharts.defaultOptions.legend.backgroundColor || // theme
+            'rgba(255,255,255,0.25)'
+        },
+        series: [{
+            name: 'Rainfall',
+            type: 'column',
+            yAxis: 1,
+            data: [{%for rain in weather_date.rains %} {{ rain }} {% if not forloop.last%}, {% endif %}{% endfor%}],
+            tooltip: {
+                valueSuffix: ' mm'
+            }
+
+        }, {
+            name: 'Temperature',
+            type: 'spline',
+            color: Highcharts.getOptions().colors[3],
+            data: [ {%for temperatura in weather_date.temperatures %} {{ temperatura }} {% if not forloop.last%}, {% endif %}{% endfor%}],
+            tooltip: {
+                valueSuffix: '°C'
+            }
+        }]
+    });
+
+Highcharts.chart('Clouds', {
+                        chart: {
+                            plotBackgroundColor: null,
+                            plotBorderWidth: null,
+                            plotShadow: false,
+                            type: 'pie'
+                            },
+                        title: {
+                            text: 'Clouds'
+                            },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer'
+                                }
+                             },
+                        series: [{
+                            name: 'in',
+                            colorByPoint: true,
+                            data: [{
+                                name: 'Sky',
+                                y : 100-{{ weather_date.clouds }},
+                                sliced: true,
+                                selected: true
+                                }, {
+                                name: 'Clouds',
+                                y: {{ weather_date.clouds }}
+                                }]
+                            }]
+                        });
+
+
+Highcharts.chart('Wind', {
+
+    title: {
+        text: 'Wind'
+    },
+    xAxis: {
+        min: -1,
+        max: 1,
+        gridLineWidth: 1
+    },
+    yAxis: {
+        min: -1,
+        max: 1
+    },
+    series: [{
+        type: 'vector',
+        name: 'Direction of wind with speed {{ weather_date.windspead }} m/s ',
+        color: Highcharts.getOptions().colors['#bbdefb'],
+        data: [
+            [0, 0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}] ,
+            [0, -0.5,{{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0.5, 0, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-0.5, 0, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0.5, 0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-0.5, -0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0.5, -0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-0.5, 0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0, 0, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [1, 1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [1, 0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [1, 0, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [1, -0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [1, -1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0.5, -1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0.5, 1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0, -1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [0, 1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-0.5, 1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-0.5, -1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-1, 1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-1, 0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-1, 0, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-1, -0.5, {{ weather_date.windspead }}, {{ weather_date.winddirection }}],
+            [-1, -1, {{ weather_date.windspead }}, {{ weather_date.winddirection }}]
+        ]
+    }]
+
+});
+
+
+{% endblock %}
