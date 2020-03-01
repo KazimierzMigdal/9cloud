@@ -57,7 +57,7 @@ def index(request):
 
 
     context = {'weather_date': weather_date, 'form': form, 'message': message, 'message_class': message_class, 'cities_names': cities_names}
-    return render(request, 'weather/test.html', context)
+    return render(request, 'weather/index_test.html', context)
 
 
 def delete_city(request, city_name):
@@ -135,5 +135,5 @@ def detail_city(request, city_name):
     context = {'weather_date': weather_date, 'cities_names': cities_names,
                 }
 
-    return render(request, 'weather/detail_city_test.html', context)
+    return render(request, 'weather/detail_test.html', context)
 
