@@ -5,6 +5,8 @@ from .forms import CityForm
 from django.http import HttpResponse
 from datetime import datetime
 
+def chartjs(request):
+    return render(request, 'weather/chartjs.html', {})
 def index(request):
     url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
 
