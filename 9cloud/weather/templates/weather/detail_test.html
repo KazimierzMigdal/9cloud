@@ -1,0 +1,96 @@
+{% extends "weather/base_test.html" %}
+{%  block content %}
+<div class="row">
+
+    <div class="card horizontal z-depth-3">
+    <div class="card-image">
+      <img class="activator" src="http://openweathermap.org/img/w/{{ weather_date.icon }}.png">
+    </div>
+    <div class="card-stacked">
+        <span class="card-title activator grey-text text-darken-4">{{ weather_date.city }}<span class='right'><i class="material-icons right">more_vert</i></span></span>
+        <br>
+        <span class="left grey-text activator">Currently <strong>{{ weather_date.description }}</strong> and tempreature <strong>{{ weather_date.temperture }}°C</strong>.
+                Speed of wind approximetly <strong>{{ weather_date.windspead }}m/s</strong> from <strong>{{ weather_date.direction_symbol }}</strong>. Pressure stable <strong>{{ weather_date.pressure }}hPa</strong> on groun level.
+                 Humidity <strong>{{ weather_date.humidity }}%</strong> with <strong>{{ weather_date.clouds }}%</strong>cloud cover.</span>
+        <br>
+        <canvas id="myChart"></canvas>
+            <span id='forecast' style="size: 90%;"></span>
+    </div>
+    <div class="card-reveal">
+      <span class="card-title grey-text text-darken-4">{{ weather_date.city }}<i class="material-icons right">close</i></span>
+      <p class="left grey-text">Source: openweathermap.org</p>
+            <div id="Clouds" class="col s12 m4 l4"></div>
+            <div id="Wind" class="col s12 m4 l4"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{%  block scripts %}
+Chart.defaults.global.elements.line.fill = false;
+
+var barChartData = {
+  labels: [{% for day in weather_date.date %} '{{ day }}' {% if not forloop.last%}, {% endif %}{% endfor%}],
+  datasets: [{
+    type: 'line',
+    label: 'Temperature',
+    yAxisID: "y-axis-0",
+    backgroundColor: "rgba(255,241,118,1)",
+    borderColor: "rgba(255,241,118,1)",
+    data: [{%for temperatura in weather_date.temperatures %} {{ temperatura }} {% if not forloop.last%}, {% endif %}{% endfor%}]
+  },
+  {
+    type: 'bar',
+    label: 'Rainfall',
+    yAxisID: "y-axis-1",
+    backgroundColor: "rgba(187,222,251,1)",
+    data: [{%for rain in weather_date.rains %} {{ rain }} {% if not forloop.last%}, {% endif %}{% endfor%}]
+  }]
+};
+
+
+var ctx = document.getElementById("myChart");
+var ch = new Chart(ctx, {
+  type: 'bar',
+  data: barChartData,
+  options: {
+    title: {
+      display: true,
+      text: "Forecast"
+    },
+    tooltips: {
+      mode: 'label'
+    },
+    responsive: true,
+    scales: {
+      xAxes: [{
+        scaleLabel: {
+            display: true,
+            labelString: 'Days and hours'
+          },
+        stacked: true
+      }],
+      yAxes: [{
+        scaleLabel: {
+            display: true,
+            labelString: 'Temperature'
+          },
+        stacked: true,
+        position: "left",
+        id: "y-axis-0",
+      }, {
+        scaleLabel: {
+            display: true,
+            labelString: 'Rainfall'
+          },
+        stacked: false,
+        position: "right",
+        id: "y-axis-1",
+        ticks: {
+          min: 0
+        },
+      }]
+    }
+  }
+});
+{% endblock %}
