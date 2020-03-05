@@ -13,14 +13,28 @@
                 Speed of wind approximetly <strong>{{ weather_date.windspead }}m/s</strong> from <strong>{{ weather_date.direction_symbol }}</strong>. Pressure stable <strong>{{ weather_date.pressure }}hPa</strong> on groun level.
                  Humidity <strong>{{ weather_date.humidity }}%</strong> with <strong>{{ weather_date.clouds }}%</strong>cloud cover.</span>
         <br>
-        <canvas id="myChart"></canvas>
-            <span id='forecast' style="size: 90%;"></span>
+          <div class="container">
+            <canvas id="myChart"></canvas>
+            <span id='forecast'></span>
+          </div>
     </div>
     <div class="card-reveal">
-      <span class="card-title grey-text text-darken-4">{{ weather_date.city }}<i class="material-icons right">close</i></span>
-      <p class="left grey-text">Source: openweathermap.org</p>
-            <div id="Clouds" class="col s12 m4 l4"></div>
-            <div id="Wind" class="col s12 m4 l4"></div>
+      <div class="column">
+        <div class="row">
+          <span class="card-title grey-text text-darken-4">{{ weather_date.city }}<i class="material-icons right">close</i></span>
+          <p class="left grey-text">Source: openweathermap.org</p>
+        </div>
+        <div class="row">
+          <div id="Wind" class="col s12 m6 l6" style="height: 60%;">
+            <h5>Clouds: {{weather_date.clouds}}%</h5>
+            <canvas id="myChart_3"></canvas>
+          </div>
+          <div id="Clouds" class="col s12 m6 l6" style="height: 60%;">
+            <h5>Humidity: {{weather_date.humidity}}%</h5>
+            <canvas id="myChart_2"></canvas>
+          </div>
+        </div>
+    </div>
     </div>
   </div>
 </div>
@@ -66,7 +80,7 @@ var ch = new Chart(ctx, {
       xAxes: [{
         scaleLabel: {
             display: true,
-            labelString: 'Days and hours'
+            labelString: 'Time'
           },
         stacked: true
       }],
@@ -83,7 +97,7 @@ var ch = new Chart(ctx, {
             display: true,
             labelString: 'Rainfall'
           },
-        stacked: false,
+        stacked: true,
         position: "right",
         id: "y-axis-1",
         ticks: {
@@ -93,4 +107,53 @@ var ch = new Chart(ctx, {
     }
   }
 });
+
+var ctx = document.getElementById("myChart_2");
+var myChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ["Humidity"],
+    datasets: [{
+      label: 'Humidity',
+      data: [{{weather_date.humidity}}],
+      backgroundColor: [
+        "rgba(187,222,251,1)"
+      ],
+      borderColor: [
+        "rgba(187,222,251,1)"
+      ]
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    responsive: true,
+    scales: {
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 100
+        },
+      }]
+    }
+  }
+});
+
+var ctx = document.getElementById("myChart_3").getContext('2d');
+var myChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: ["Clouds", "Sky"],
+    datasets: [{
+      backgroundColor: [
+        "rgba(158,158,158,1)",
+        "rgba(187,222,251,1)"
+      ],
+      data: [{{weather_date.clouds}}, 100-{{weather_date.clouds}}]
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    responsive: true
+    }
+  });
 {% endblock %}
