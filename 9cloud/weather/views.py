@@ -75,14 +75,13 @@ def detail_city(request, city_name):
     city = City.objects.get(name=city_name)
     r=requests.get(url.format(city)).json()
     l=requests.get(url2.format(city)).json()
-
     days = []
     tempertures = []
     rains = []
     cities_names = []
 
-    for city in City.objects.all():
-        cities_names.append(city.name)
+    for town in City.objects.all():
+        cities_names.append(town.name)
 
     list_data = l['list']
     for day_data in range(len(list_data)):
@@ -119,7 +118,7 @@ def detail_city(request, city_name):
     direction_grup= int((float(direction)+22.5)/45)
     direction_symbol = direction_symbol_list[direction_grup]
 
-    weather_date = {'city': city.name,
+    weather_date = {'city': city,
                 'temperture': r['main']['temp'],
                 'description': r['weather'][0]['description'],
                 'icon': r['weather'][0]['icon'],
@@ -133,6 +132,8 @@ def detail_city(request, city_name):
                 'temperatures': tempertures,
                 'rains': rains,
                 }
+
+    print(weather_date['city'])
 
     context = {'weather_date': weather_date, 'cities_names': cities_names,
                 }
