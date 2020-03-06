@@ -9,11 +9,12 @@
     <div class="card-stacked">
         <span class="card-title activator grey-text text-darken-4">{{ weather_date.city }}<span class='right'><i class="material-icons right">more_vert</i></span></span>
         <br>
+        {{ weather_date.city }}
         <span class="left grey-text activator">Currently <strong>{{ weather_date.description }}</strong> and tempreature <strong>{{ weather_date.temperture }}°C</strong>.
                 Speed of wind approximetly <strong>{{ weather_date.windspead }}m/s</strong> from <strong>{{ weather_date.direction_symbol }}</strong>. Pressure stable <strong>{{ weather_date.pressure }}hPa</strong> on groun level.
                  Humidity <strong>{{ weather_date.humidity }}%</strong> with <strong>{{ weather_date.clouds }}%</strong>cloud cover.</span>
         <br>
-          <div class="container">
+          <div style="margin-right: 40px; margin-bottom: 20px;">
             <canvas id="myChart"></canvas>
             <span id='forecast'></span>
           </div>
@@ -82,7 +83,7 @@ var ch = new Chart(ctx, {
             display: true,
             labelString: 'Time'
           },
-        stacked: true
+        stacked: true,
       }],
       yAxes: [{
         scaleLabel: {
@@ -101,8 +102,11 @@ var ch = new Chart(ctx, {
         position: "right",
         id: "y-axis-1",
         ticks: {
-          min: 0
+          beginAtZero:true
         },
+        gridLines: {
+                drawOnChartArea: false
+          },
       }]
     }
   }
