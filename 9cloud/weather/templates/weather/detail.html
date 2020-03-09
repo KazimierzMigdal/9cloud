@@ -1,4 +1,4 @@
-{% extends "weather/base_test.html" %}
+{% extends "weather/base.html" %}
 {%  block content %}
 <div class="row">
 
@@ -9,15 +9,11 @@
     <div class="card-stacked">
         <span class="card-title activator grey-text text-darken-4">{{ weather_date.city }}<span class='right'><i class="material-icons right">more_vert</i></span></span>
         <br>
-        {{ weather_date.city }}
         <span class="left grey-text activator">Currently <strong>{{ weather_date.description }}</strong> and tempreature <strong>{{ weather_date.temperture }}°C</strong>.
                 Speed of wind approximetly <strong>{{ weather_date.windspead }}m/s</strong> from <strong>{{ weather_date.direction_symbol }}</strong>. Pressure stable <strong>{{ weather_date.pressure }}hPa</strong> on groun level.
                  Humidity <strong>{{ weather_date.humidity }}%</strong> with <strong>{{ weather_date.clouds }}%</strong>cloud cover.</span>
         <br>
-          <div style="margin-right: 40px; margin-bottom: 20px;">
-            <canvas id="myChart"></canvas>
-            <span id='forecast'></span>
-          </div>
+            <canvas id="myChart" style="position: relative; height: 70vh; width: 65vw; margin-right: 20px;"></canvas>
     </div>
     <div class="card-reveal">
       <div class="column">
@@ -26,11 +22,11 @@
           <p class="left grey-text">Source: openweathermap.org</p>
         </div>
         <div class="row">
-          <div id="Wind" class="col s12 m6 l6" style="height: 60%;">
+          <div id="Wind" class="col s12 m6 l6" style="height: 50%; margin-bottom: 40px;">
             <h5>Clouds: {{weather_date.clouds}}%</h5>
             <canvas id="myChart_3"></canvas>
           </div>
-          <div id="Clouds" class="col s12 m6 l6" style="height: 60%;">
+          <div id="Clouds" class="col s12 m6 l6" style="height: 50%; margin-bottom: 40px;">
             <h5>Humidity: {{weather_date.humidity}}%</h5>
             <canvas id="myChart_2"></canvas>
           </div>
@@ -76,14 +72,16 @@ var ch = new Chart(ctx, {
     tooltips: {
       mode: 'label'
     },
-    responsive: true,
+    responsive: false,
     scales: {
       xAxes: [{
         scaleLabel: {
-            display: true,
-            labelString: 'Time'
+            display: true
           },
         stacked: true,
+        gridLines: {
+                drawOnChartArea: false
+          },
       }],
       yAxes: [{
         scaleLabel: {
