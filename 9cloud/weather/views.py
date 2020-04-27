@@ -1,139 +1,120 @@
-import requests
-from django.shortcuts import render, redirect
-from .models import City
 from .forms import CityForm
-from django.http import HttpResponse
+from .models import City
 from datetime import datetime
-
-
-def index(request):
-    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
-
-    err_msg = ''
-    message = ''
-    message_class = ''
-
-    if request.method == 'POST':
-        form = CityForm(request.POST)
-
-        if form.is_valid():
-            new_city = form.cleaned_data['name']
-            existing_city_count = City.objects.filter(name=new_city).count()
-
-            if existing_city_count == 0:
-                r = requests.get(url.format(new_city)).json()
-
-                if r['cod'] == 200:
-                    form.save()
-                else:
-                    err_msg = 'City does not exist in the world!'
-
-            else:
-                err_msg = 'City already exists in the database!'
-
-        if err_msg:
-            message = err_msg
-            message_class = 'danger'
-        else:
-            message = 'City added successfully!'
-            message_class = 'success'
-
-    form = CityForm()
-    cities = City.objects.all().order_by('-id')
-
-
-    weather_date = []
-    cities_names = []
-    for city in cities:
-        r=requests.get(url.format(city)).json()
-        cities_names.append(city.name)
-        city_weather = {
-            'city': city.name,
-            'temperture': r['main']['temp'],
-            'description': r['weather'][0]['description'],
-            'icon': r['weather'][0]['icon'],
-        }
-
-        weather_date.append(city_weather)
-
-
-    context = {'weather_date': weather_date, 'form': form, 'message': message, 'message_class': message_class, 'cities_names': cities_names}
-    return render(request, 'weather/index.html', context)
+from django.contrib import messages
+from django.shortcuts import redirect, render
+import requests
 
 
 def delete_city(request, city_name):
     City.objects.get(name=city_name).delete()
+    messages.error(request, f'City deleted successfully!')
     return redirect('index')
 
 
 def detail_city(request, city_name):
-    url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
-    url2 = 'http://api.openweathermap.org/data/2.5/forecast?q={}&&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
-
-
+    cities = City.objects.all().order_by('-id')
     city = City.objects.get(name=city_name)
-    r=requests.get(url.format(city)).json()
-    l=requests.get(url2.format(city)).json()
-    days = []
-    tempertures = []
-    rains = []
-    cities_names = []
+    source = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
+    data = requests.get(source.format(city)).json()
+    source_detail = 'http://api.openweathermap.org/data/2.5/forecast?q={}&&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
+    data_detail = requests.get(source_detail.format(city)).json()
 
-    for town in City.objects.all():
-        cities_names.append(town.name)
-
-    list_data = l['list']
+    #forecast
+    days, tempertures, rains = [], [], []
+    list_data = data_detail['list']
     for day_data in range(len(list_data)):
-        data = list_data[day_data]
-
-        day = data['dt_txt']
-        day_date_object = datetime.strptime(day, '%Y-%m-%d %H:%M:%S')
-        str_day=day_date_object.strftime("%H:%M")
-        days.append(str_day)
-
-        temperture = data['main']['temp']
+        date_data = list_data[day_data]
+        day = date_data['dt_txt']
+        day_object = datetime.strptime(day, '%Y-%m-%d %H:%M:%S')
+        day_str=day_object.strftime("%H:%M")
+        days.append(day_str)
+        temperture = date_data['main']['temp']
         tempertures.append(temperture)
-        if 'rain' in data.keys():
-            if '1h' in data['rain'].keys():
-                 rain = data['rain']['1h']
-            elif '3h' in data['rain'].keys():
-                rain = data['rain']['3h']
+        if 'rain' in date_data.keys():
+            if '1h' in date_data['rain'].keys():
+                 rain = date_data['rain']['1h']
+            elif '3h' in date_data['rain'].keys():
+                rain = date_data['rain']['3h']
             else:
                 rain = 0
         else:
             rain = 0
         rains.append(rain)
-
-    if 'deg' in r['wind'].keys():
-        direction = r['wind']['deg']
-    else:
-        direction=0
-
-    rains=rains[:9]
+    #time period for forecast
     days=days[:9]
     tempertures = tempertures[:9]
+    rains=rains[:9]
+
+    #detail_informations
+    clouds = data['clouds']['all']
+    description = data['weather'][0]['description']
+    humidity = data['main']['humidity']
+    icon =  data['weather'][0]['icon']
+    pressure = data['main']['pressure']
+    temperature = data['main']['temp']
+    windspead = data['wind']['speed']
 
     direction_symbol_list = ['NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE', 'E']
-    direction_grup= int((float(direction)+22.5)/45)
-    direction_symbol = direction_symbol_list[direction_grup]
+    if 'deg' in data['wind'].keys():
+        direction = data['wind']['deg']
+    else:
+        direction=0
+    wind_direction_grup= int((float(direction)+22.5)/45)
+    wind_direction_symbol = direction_symbol_list[wind_direction_grup]
 
     weather_date = {'city': city,
-                'temperture': r['main']['temp'],
-                'description': r['weather'][0]['description'],
-                'icon': r['weather'][0]['icon'],
-                'windspead': r['wind']['speed'],
-                'winddirection': direction,
-                'direction_symbol': direction_symbol,
-                'clouds': r['clouds']['all'],
-                'pressure': r['main']['pressure'],
-                'humidity': r['main']['humidity'],
+                'clouds': clouds,
                 'date': days,
-                'temperatures': tempertures,
+                'description': description,
+                'humidity': humidity,
+                'icon': icon,
+                'pressure': pressure,
                 'rains': rains,
+                'temperture': temperature,
+                'windspead': windspead,
+                'wind_direction_symbol': wind_direction_symbol,
+                'temperatures': tempertures,
                 }
 
-    context = {'weather_date': weather_date, 'cities_names': cities_names,
-                }
+    context = {'weather_date': weather_date, 'cities': cities}
 
     return render(request, 'weather/detail.html', context)
 
+
+def index(request):
+    cities = City.objects.all().order_by('-id')
+    source = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
+    weather_date = []
+
+    if request.method == 'POST':
+        form = CityForm(request.POST)
+        if form.is_valid():
+            new_city = form.cleaned_data['name']
+            existing_city_count = City.objects.filter(name=new_city).count()
+            if existing_city_count == 0:
+                data = requests.get(source.format(new_city)).json()
+                if data['cod'] == 200:
+                    form.save()
+                    messages.success(request, f'City added successfully!')
+                else:
+                    messages.error(request, f'City does not exist in the world!')
+            else:
+                messages.warning(request, f'City already exists in the database!')
+
+    form = CityForm()
+
+    for city in cities:
+        data=requests.get(source.format(city)).json()
+        city_weather = {
+            'city': city.name,
+            'temperture': data['main']['temp'],
+            'description': data['weather'][0]['description'],
+            'icon': data['weather'][0]['icon']}
+        weather_date.append(city_weather)
+
+    context = {'cities': cities,
+            'form': form,
+            'weather_date': weather_date}
+
+    return render(request, 'weather/index.html', context)

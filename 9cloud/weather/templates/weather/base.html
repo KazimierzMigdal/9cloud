@@ -21,7 +21,6 @@
         <ul class="right hide-on-med-and-down">
           <li><a href="{% url 'index' %}">Home</a></li>
           <li><a href="">About</a></li>
-          <li><a href="">Contact</a></li>
         </ul>
       </div>
     </nav>
@@ -29,8 +28,21 @@
 
   <ul class="sidenav" id="mobile-links">
     <li><a href="{% url 'index' %}">Home</a></li>
+    <ul class="collapsible">
+      <li>
+        <div class="collapsible-header" style="margin-left: 3vh;"><strong>Cities</strong></div>
+        <div class="collapsible-body">
+          <ul>
+            {% for city in cities %}
+            <li><a href="{% url 'detail_city' city %}"">{{city}}</a></li>
+            {% empty %}
+              <li><a href="">No city's been added</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </li>
+    </ul>
     <li><a href="">About</a></li>
-    <li><a href="">Contact</a></li>
   </ul>
 
   <div class="container">
@@ -45,12 +57,18 @@
 
   <script>
     $(document).ready(function(){
+      $('.collapsible').collapsible();
       $('.sidenav').sidenav();
-      {% if message_class == 'danger'%}
-         M.toast({html: "{{message}}", classes: 'pink lighten-4 rounded', displayLength:4000});
-      {% endif %}
-      {% if message_class == 'success'%}
-         M.toast({html: "{{message}}", classes: 'blue lighten-4 rounded', displayLength:2000});
+      {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                M.toast({html: "{{message}}", classes: 'blue lighten-4 rounded', displayLength:2000});
+            {% elif message.tags == 'warning'%}
+                M.toast({html: "{{message}}", classes: 'yellow lighten-2 rounded', displayLength:2000});
+            {% elif message.tags == 'error'%}
+                M.toast({html: "{{message}}", classes: 'pink lighten-4 rounded', displayLength:2000});
+            {% endif %}
+        {% endfor %}
       {% endif %}
     });
     {% block scripts %}
