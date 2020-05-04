@@ -1,0 +1,161 @@
+{% extends "weather/base.html" %}
+{%  block content %}
+<div class="row">
+
+    <div class="card horizontal z-depth-3">
+    <div class="card-image">
+      <img class="activator" src="http://openweathermap.org/img/w/{{ weather_date.icon }}.png">
+    </div>
+    <div class="card-stacked">
+        <span class="card-title activator grey-text text-darken-4">{{ weather_date.city }}<span class='right'><i class="material-icons right">more_vert</i></span></span>
+        <br>
+        <span class="left grey-text activator">Currently <strong>{{ weather_date.description }}</strong> and tempreature <strong>{{ weather_date.temperture }}°C</strong>.
+                Speed of wind approximetly <strong>{{ weather_date.windspead }}m/s</strong> from <strong>{{ weather_date.wind_direction_symbol }}</strong>. Pressure stable <strong>{{ weather_date.pressure }}hPa</strong> on groun level.
+                 Humidity <strong>{{ weather_date.humidity }}%</strong> with <strong>{{ weather_date.clouds }}%</strong>cloud cover.</span>
+        <br>
+            <canvas id="forecast" style="position: relative; height: 70vh; width: 65vw; margin-right: 20px;"></canvas>
+    </div>
+    <div class="card-reveal">
+      <div class="column">
+        <div class="row">
+          <span class="card-title grey-text text-darken-4">{{ weather_date.city }}<i class="material-icons right">close</i></span>
+          <p class="left grey-text">Source: openweathermap.org</p>
+        </div>
+        <div class="row">
+          <div class="col s12 m6 l6" style="height: 50%; margin-bottom: 40px;">
+            <h5>Clouds: {{weather_date.clouds}}%</h5>
+            <canvas id="Wind"></canvas>
+          </div>
+          <div class="col s12 m6 l6" style="height: 50%; margin-bottom: 40px;">
+            <h5>Humidity: {{weather_date.humidity}}%</h5>
+            <canvas id="Clouds"></canvas>
+          </div>
+        </div>
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{%  block scripts %}
+Chart.defaults.global.elements.line.fill = false;
+
+var barChartData = {
+  labels: [{% for day in weather_date.date %} '{{ day }}' {% if not forloop.last%}, {% endif %}{% endfor%}],
+  datasets: [{
+    type: 'line',
+    label: 'Temperature',
+    yAxisID: "y-axis-0",
+    backgroundColor: "rgba(255,241,118,1)",
+    borderColor: "rgba(255,241,118,1)",
+    data: [{%for temperatura in weather_date.temperatures %} {{ temperatura }} {% if not forloop.last%}, {% endif %}{% endfor%}]
+  },
+  {
+    type: 'bar',
+    label: 'Rainfall',
+    yAxisID: "y-axis-1",
+    backgroundColor: "rgba(187,222,251,1)",
+    data: [{%for rain in weather_date.rains %} {{ rain }} {% if not forloop.last%}, {% endif %}{% endfor%}]
+  }]
+};
+
+
+var ctx = document.getElementById("forecast");
+var ch = new Chart(ctx, {
+  type: 'bar',
+  data: barChartData,
+  options: {
+    title: {
+      display: true,
+      text: "Forecast"
+    },
+    tooltips: {
+      mode: 'label'
+    },
+    responsive: false,
+    scales: {
+      xAxes: [{
+        scaleLabel: {
+            display: true
+          },
+        stacked: true,
+        gridLines: {
+                drawOnChartArea: false
+          },
+      }],
+      yAxes: [{
+        scaleLabel: {
+            display: true,
+            labelString: 'Temperature'
+          },
+        stacked: true,
+        position: "left",
+        id: "y-axis-0",
+      }, {
+        scaleLabel: {
+            display: true,
+            labelString: 'Rainfall'
+          },
+        stacked: true,
+        position: "right",
+        id: "y-axis-1",
+        ticks: {
+          beginAtZero:true
+        },
+        gridLines: {
+                drawOnChartArea: false
+          },
+      }]
+    }
+  }
+});
+
+var ctx = document.getElementById("Clouds");
+var myChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ["Humidity"],
+    datasets: [{
+      label: 'Humidity',
+      data: [{{weather_date.humidity}}],
+      backgroundColor: [
+        "rgba(187,222,251,1)"
+      ],
+      borderColor: [
+        "rgba(187,222,251,1)"
+      ]
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    responsive: true,
+    scales: {
+      yAxes: [{
+        ticks: {
+          min: 0,
+          max: 100
+        },
+      }]
+    }
+  }
+});
+
+var ctx = document.getElementById("Wind").getContext('2d');
+var myChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: ["Clouds", "Sky"],
+    datasets: [{
+      backgroundColor: [
+        "rgba(158,158,158,1)",
+        "rgba(187,222,251,1)"
+      ],
+      data: [{{weather_date.clouds}}, 100-{{weather_date.clouds}}]
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    responsive: true
+    }
+  });
+{% endblock %}

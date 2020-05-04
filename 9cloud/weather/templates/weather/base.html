@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+
+  <title>9cloud</title>
+</head>
+<body>
+  <div class="navbar-fixed">
+    <nav class="nav-wrapper blue lighten-4">
+      <div class="container">
+        <a href="{% url 'index' %}" class="brand-logo">9cloud</a>
+        <a href="#" class="sidenav-trigger" data-target="mobile-links">
+          <i class="material-icons">menu</i>
+        </a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="">About</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <ul class="sidenav" id="mobile-links">
+    <li><a href="{% url 'index' %}">Home</a></li>
+    <ul class="collapsible">
+      <li>
+        <div class="collapsible-header" style="margin-left: 3vh;"><strong>Cities</strong></div>
+        <div class="collapsible-body">
+          <ul>
+            {% for city in cities %}
+            <li><a href="{% url 'detail_city' city %}"">{{city}}</a></li>
+            {% empty %}
+              <li><a href="">No city's been added</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </li>
+    </ul>
+    <li><a href="">About</a></li>
+  </ul>
+
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+  <!--Import JQuery CDN for Materialize -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+  <!--Import JQuery CDN for ChartJS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+
+  <script>
+    $(document).ready(function(){
+      $('.collapsible').collapsible();
+      $('.sidenav').sidenav();
+      {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                M.toast({html: "{{message}}", classes: 'blue lighten-4 rounded', displayLength:2000});
+            {% elif message.tags == 'warning'%}
+                M.toast({html: "{{message}}", classes: 'yellow lighten-2 rounded', displayLength:2000});
+            {% elif message.tags == 'error'%}
+                M.toast({html: "{{message}}", classes: 'pink lighten-4 rounded', displayLength:2000});
+            {% endif %}
+        {% endfor %}
+      {% endif %}
+    });
+    {% block scripts %}
+    {% endblock %}
+  </script>
+</body>
