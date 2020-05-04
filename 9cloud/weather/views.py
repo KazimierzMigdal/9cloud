@@ -20,6 +20,8 @@ def detail_city(request, city_name):
     source_detail = 'http://api.openweathermap.org/data/2.5/forecast?q={}&&units=metric&appid=9a5f969d3828fdb7109c000f855bf43c'
     data_detail = requests.get(source_detail.format(city)).json()
 
+    forecast = City.objects.get_forecast(data_detail)
+
     #forecast
     days, tempertures, rains = [], [], []
     list_data = data_detail['list']
@@ -65,17 +67,15 @@ def detail_city(request, city_name):
 
     weather_date = {'city': city,
                 'clouds': clouds,
-                'date': days,
                 'description': description,
                 'humidity': humidity,
                 'icon': icon,
                 'pressure': pressure,
-                'rains': rains,
                 'temperture': temperature,
                 'windspead': windspead,
                 'wind_direction_symbol': wind_direction_symbol,
-                'temperatures': tempertures,
                 }
+    weather_date.update(forecast)
 
     context = {'weather_date': weather_date, 'cities': cities}
 
