@@ -3,9 +3,9 @@ from django.db import models
 
 
 class CityMenager(models.Manager):
-    def get_forecast(self, data_detail):
+    def get_forecast(self, forecast_data, period):
         days, tempertures, rains = [], [], []
-        list_data = data_detail['list']
+        list_data = forecast_data['list']
         for day_data in range(len(list_data)):
             date_data = list_data[day_data]
             day = date_data['dt_txt']
@@ -25,33 +25,44 @@ class CityMenager(models.Manager):
                 rain = 0
             rains.append(rain)
 
-        #time period for forecast
-        days=days[:9]
-        tempertures = tempertures[:9]
-        rains=rains[:9]
+        days=days[:period]
+        tempertures = tempertures[:period]
+        rains=rains[:period]
 
-        # clouds = data['clouds']['all']
-        # description = data['weather'][0]['description']
-        # humidity = data['main']['humidity']
-        # icon =  data['weather'][0]['icon']
-        # pressure = data['main']['pressure']
-        # temperature = data['main']['temp']
-        # windspead = data['wind']['speed']
-
-        # direction_symbol_list = ['NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE', 'E']
-        # if 'deg' in data['wind'].keys():
-        #     direction = data['wind']['deg']
-        # else:
-        #     direction=0
-        # wind_direction_grup= int((float(direction)+22.5)/45)
-        # wind_direction_symbol = direction_symbol_list[wind_direction_grup]
-
-        forecast = {'date': days,
+        return {'date': days,
                 'rains': rains,
-                'temperatures': tempertures,
+                'temperatures': tempertures
                 }
 
-        return forecast
+
+    def get_weather_data(self, detail_data):
+        city = detail_data['name']
+        clouds = detail_data['clouds']['all']
+        description = detail_data['weather'][0]['description']
+        humidity = detail_data['main']['humidity']
+        icon =  detail_data['weather'][0]['icon']
+        pressure = detail_data['main']['pressure']
+        temperature = detail_data['main']['temp']
+        windspead = detail_data['wind']['speed']
+
+        direction_symbol_list = ['NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE', 'E']
+        if 'deg' in detail_data['wind'].keys():
+            direction = detail_data['wind']['deg']
+        else:
+            direction=0
+        wind_direction_grup= int((float(direction)+22.5)/45)
+        wind_direction_symbol = direction_symbol_list[wind_direction_grup]
+
+        return {'city': city,
+                'clouds': clouds,
+                'description': description,
+                'humidity': humidity,
+                'icon': icon,
+                'pressure': pressure,
+                'temperture': temperature,
+                'windspead': windspead,
+                'wind_direction_symbol': wind_direction_symbol
+                }
 
 
 class City(models.Model):
